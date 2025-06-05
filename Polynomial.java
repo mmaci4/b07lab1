@@ -1,67 +1,108 @@
 public class Polynomial {
-	double [] c;;
+	double[] coefficients;
+	int[] exponents;
+
 
 	public Polynomial() {
-	    c = new double[9];
+	    this.coefficients = new double[0];
+	    this.exponents = new int[0];
 
 	}
 
-	public Polynomial(double [] r) {
-		c = r;
-
-		
+	public Polynomial(double[] coefficients, int[] exponents) {
+		this.coefficients = coefficients;
+		this.exponents = exponents;	
 
 	}
-
-	public Polynomial add(Polynomial object) {
 	
-		int a = this.c.length;
-		int b = object.c.length;
-		int size = 0;
-		int min = 0;
+	public static int search(int[] arr, int z) {
+		
+		//search if z is in the array arr.Return index found or -1,works on unsorted arrays as well with bad complexity.
+	    for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == z) {
+                return i;
+            }
+        }
+            return -1;	
+		
+	}
 
 
-		if (a>b) {
-	    	    min = b;
-		    size = a;
-			}
-		else {
-	    	    min = a;
-		    size = b;
-
-			}
-
-		double [] f = new double[size];
-
-		for(int i=0;i<size;i++){
-			if (i >= a) {
-				f[i] = object.c[i];
-			} else if (i >= b) {
-				f[i] = this.c[i];
-			} else {
-				f[i] = this.c[i] + object.c[i];
+	public Polynomial add(Polynomial other) {
+	
+		int a = this.coefficients.length;
+		int b = other.coefficients.length;
+		int size = a + b;
+		double[] sumC = new double[size];
+		int[] sumE = new int[size];
+		int sumIndex = 0;         //keep track of filled up in sum.
+		
+		for (int i = 0; i < a; i++) {			//copy first polynomial
+			sumC[sumIndex] = this.coefficients[sumIndex];
+			sumE[sumIndex] = this.exponents[sumIndex];
+			sumIndex++;			
 		}
+		
+		for (int j = 0; j < b; j++) {		//copy or add second polynomial.
 			
+			int found = search(this.exponents, other.exponents[j]);
+			
+			if (found == -1) {
+				sumC[sumIndex] = other.coefficients[j];
+				sumE[sumIndex] = other.exponents[j];
+				sumIndex++;					
+			}
+			else {
+				sumC[found] = sumC[found] + other.coefficients[j];
+			}		
 		}
-		
-		
 	
-		Polynomial p = new Polynomial(f);
+		Polynomial p = new Polynomial(sumC, sumE);
 		return p;
 
 	}
+	
+	
+	
+	public Polynomial multiply(Polynomial other) {
+		
+		int a = this.coefficients.length;
+		int b = other.coefficients.length;
+		int size = a * b;
+		double[] productC = new double[size];
+		int[] productE = new int[size];
+		int productIndex = 0;  
+		
+		for (int i = 0; i < a; i++) {
+			
+			for (int j = 0; j < b; j++) {
+				int found = search(productE, this.exponents[i] + other.exponents[j]);
+				if (found == -1) {
+					productC[productIndex] = this.coefficients[i] * other.coefficients[j];
+					productE[productIndex] = this.exponents[i] + other.exponents[j];
+					productIndex++;
+				}
+				else {
+					productC[found] = productC[found] + (this.coefficients[i] * other.coefficients[j]);
+				}
+			}			
+		}
+		
+		Polynomial p = new Polynomial(productC, productE);
+		return p;
+	}
 
 	public double evaluate(double a) {
-		if (this.c==null) {
+		if (this.coefficients.length == 0) {
 			return 0.0;
 		}
 
 		else {
 			double b = 0;
-			int size = this.c.length;
+			int size = this.coefficients.length;
 
 			for(int i=0;i<size;i++){
-				b = b + (this.c[i]*Math.pow(a,i));
+				b = b + (this.coefficients[i]*Math.pow(a,this.exponents[i]));
 			}
 
 			return b;
